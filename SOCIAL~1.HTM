@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brickventuring Social Media Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #0D0B61;
+    --steel: #294669;
+    --teal: #478B8D;
+    --gold: #E4D329;
+    --bg: #080620;
+    --card: #0f0d42;
+    --card-hover: #161370;
+    --border: #1e1a6e;
+    --text: #e8e8f0;
+    --text-dim: #9596b8;
+    --green: #5ee6a0;
+    --red: #f87171;
+    --instagram: #E1306C;
+    --facebook: #1877F2;
+    --tiktok: #00f2ea;
+    --youtube: #FF0000;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(13,11,97,0.6) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(41,70,105,0.4) 0%, transparent 60%);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gold), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .header-subtitle {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .month-nav button {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .month-nav button:hover { background: var(--card-hover); }
+  .month-nav button:disabled { opacity: 0.3; cursor: default; }
+
+  .month-nav select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 32px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    transition: transform 0.15s, background 0.2s;
+  }
+
+  .kpi-card:hover { transform: translateY(-2px); background: var(--card-hover); }
+
+  .kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .kpi-change {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .kpi-change.up { color: var(--green); }
+  .kpi-change.down { color: var(--red); }
+  .kpi-change.neutral { color: var(--text-dim); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 1100px) {
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 700px) {
+    .grid-2, .grid-4 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .platform-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .platform-row:last-child { border-bottom: none; }
+
+  .platform-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .platform-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .platform-name { font-weight: 500; font-size: 14px; }
+
+  .platform-value {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .platform-change {
+    font-size: 11px;
+    margin-left: 6px;
+  }
+
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    text-align: left;
+    padding: 8px 10px;
+    font-weight: 600;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  .chart-container {
+    position: relative;
+    height: 260px;
+  }
+
+  /* Top posts */
+  .top-posts-platform {
+    margin-bottom: 0;
+  }
+
+  .top-posts-platform h4 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .post-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+
+  .post-item:last-child { border-bottom: none; }
+
+  .post-rank {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  .post-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 12px;
+  }
+
+  .post-type-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+
+  .post-views {
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tag-short-video { background: rgba(71,139,141,0.2); color: var(--teal); }
+  .tag-long-video { background: rgba(228,211,41,0.15); color: var(--gold); }
+  .tag-image { background: rgba(225,48,108,0.15); color: var(--instagram); }
+  .tag-text { background: rgba(41,70,105,0.3); color: #7ab0e6; }
+
+  /* Engagement */
+  .engagement-bar-wrap {
+    margin-bottom: 14px;
+  }
+
+  .engagement-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .engagement-bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .engagement-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  /* Demographics */
+  .demo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+
+  .demo-label {
+    width: 60px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .demo-bar-track {
+    flex: 1;
+    height: 14px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .demo-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+
+  .demo-pct {
+    width: 40px;
+    font-weight: 600;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 32px 0 16px;
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab-btn:hover { background: var(--card-hover); color: var(--text); }
+  .tab-btn.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+  /* Page-level tab navigation */
+  .page-tab-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .page-tab-btn {
+    padding: 10px 28px;
+    border-radius: 24px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.3px;
+  }
+
+  .page-tab-btn:hover {
+    background: var(--card-hover);
+    color: var(--text);
+    border-color: var(--teal);
+  }
+
+  .page-tab-btn.active {
+    background: linear-gradient(135deg, var(--navy), var(--teal));
+    color: var(--gold);
+    border-color: var(--teal);
+  }
+
+  .kpi-rolling-avg {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Brickventuring Social Media Dashboard</h1>
+  <div class="month-nav">
+    <button id="prevMonth" onclick="changeMonth(-1)">&#8249;</button>
+    <select id="monthSelect" onchange="selectMonth(this.value)"></select>
+    <button id="nextMonth" onclick="changeMonth(1)">&#8250;</button>
+  </div>
+</div>
+<div class="header-subtitle">Monthly performance tracking across Instagram, Facebook, TikTok &amp; YouTube</div>
+
+<div class="page-tab-bar">
+  <button class="page-tab-btn active" id="pageTabStats" onclick="switchPageTab('stats')">Stats Dashboard</button>
+  <button class="page-tab-btn" id="pageTabMedia" onclick="switchPageTab('media')">Media Kit</button>
+</div>
+
+<div id="statsTab">
+<!-- KPI Cards -->
+<div class="kpi-row" id="kpiRow"></div>
+
+<!-- Platform Followers & Views -->
+<div class="grid-2">
+  <div class="card">
+    <h3>Followers by Platform</h3>
+    <div id="followersList"></div>
+  </div>
+  <div class="card">
+    <h3>Views by Platform</h3>
+    <div id="viewsList"></div>
+  </div>
+</div>
+
+<!-- Engagement Section -->
+<div class="section-title">Engagement</div>
+<div class="grid-4" id="engagementCards"></div>
+
+<!-- Charts -->
+<div class="grid-2">
+  <div class="card">
+    <h3>Posts by Type</h3>
+    <div class="chart-container">
+      <canvas id="postTypeChart"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Views by Platform</h3>
+    <div class="chart-container">
+      <canvas id="viewsChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Trend Charts -->
+<div class="grid-2">
+  <div class="card">
+    <h3>Follower Growth (All Months)</h3>
+    <div class="chart-container">
+      <canvas id="followerTrendChart"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Total Views (All Months)</h3>
+    <div class="chart-container">
+      <canvas id="viewsTrendChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Post Breakdown Table -->
+<div class="card" style="margin-bottom: 24px;">
+  <h3>Post Breakdown by Platform</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Short Video</th>
+          <th>Long Video</th>
+          <th>Image</th>
+          <th>Text</th>
+          <th>Total Posts</th>
+          <th>Total Views</th>
+        </tr>
+      </thead>
+      <tbody id="postTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Top Performing Posts -->
+<div class="section-title">Top 10 Performing Posts</div>
+<div class="tab-bar" id="topPostsTabs"></div>
+<div class="card" style="margin-bottom:24px;" id="topPostsContent"></div>
+
+<!-- Demographics -->
+<div class="section-title">Follower Demographics</div>
+<div class="grid-2" id="demoSection">
+  <div class="card">
+    <h3>Age Distribution (All Platforms)</h3>
+    <div id="ageDemo"></div>
+  </div>
+  <div class="card">
+    <h3>Gender Split (All Platforms)</h3>
+    <div class="chart-container">
+      <canvas id="genderChart"></canvas>
+    </div>
+  </div>
+</div>
+<div class="grid-2" style="margin-top:16px;">
+  <div class="card">
+    <h3>Top Countries</h3>
+    <div id="countryDemo"></div>
+  </div>
+  <div class="card">
+    <h3>Demographics by Platform</h3>
+    <div class="chart-container">
+      <canvas id="demoPlatformChart"></canvas>
+    </div>
+  </div>
+</div>
+</div><!-- end statsTab -->
+
+<div id="mediaKitTab" style="display:none;">
+<!-- ============================================================ -->
+<!-- BRAND PARTNERSHIP / MEDIA KIT SECTION -->
+<!-- ============================================================ -->
+<div style="margin-bottom:8px;">
+  <h1 style="font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;">Brand Partnership Media Kit</h1>
+  <p style="color:var(--text-dim);font-size:13px;margin-bottom:28px;">Everything brands need to know about working with Brickventuring</p>
+</div>
+
+<!-- About & Content Pillars -->
+<div class="grid-2">
+  <div class="card">
+    <h3>About Brickventuring</h3>
+    <p style="font-size:14px;line-height:1.7;color:var(--text);margin-bottom:14px;">
+      Brickventuring is a multi-platform LEGO content creator producing entertaining, authentic content across Instagram, TikTok, YouTube, and Facebook. With a combined reach of <strong style="color:var(--gold);" id="mkTotalFollowers">48K+</strong> followers and <strong style="color:var(--gold);" id="mkTotalViews">2.6M+</strong> monthly views, the channel connects with an engaged community of adult LEGO fans, collectors, and builders.
+    </p>
+    <p style="font-size:14px;line-height:1.7;color:var(--text);">
+      Known for humor-driven content, hands-on reviews, and creative MOC builds, Brickventuring delivers brand messages in a way that feels natural and trusted by the audience.
+    </p>
+  </div>
+  <div class="card">
+    <h3>Content Pillars</h3>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(228,211,41,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🎭</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:2px;">Entertainment & Humor</div>
+          <div style="font-size:12px;color:var(--text-dim);">POV skits, challenges, ASMR, and comedy-driven LEGO content that drives viral reach</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(71,139,141,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🧱</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:2px;">MOCs & Custom Builds</div>
+          <div style="font-size:12px;color:var(--text-dim);">Original creations, build techniques, speed builds, and detailed showcases</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(225,48,108,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">📦</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:2px;">Reviews & Unboxing</div>
+          <div style="font-size:12px;color:var(--text-dim);">Honest product reviews, set features, and unboxing experiences</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="width:36px;height:36px;border-radius:8px;background:rgba(41,70,105,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">📰</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:2px;">LEGO News & Commentary</div>
+          <div style="font-size:12px;color:var(--text-dim);">Set rumors, industry news, and community discussion</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Audience Highlights for Brands -->
+<div class="section-title">Why Brands Work With Us</div>
+<div class="kpi-row" id="brandKPIs">
+  <div class="kpi-card">
+    <div class="kpi-label">Organic Reach</div>
+    <div class="kpi-value" style="font-size:22px;">95%</div>
+    <div class="kpi-change neutral">of IG viewers are non-followers</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Core Audience</div>
+    <div class="kpi-value" style="font-size:22px;">25-44</div>
+    <div class="kpi-change neutral">age range with spending power</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Top Market</div>
+    <div class="kpi-value" style="font-size:22px;">USA</div>
+    <div class="kpi-change neutral">~40% across all platforms</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Content Type</div>
+    <div class="kpi-value" style="font-size:22px;">Reels</div>
+    <div class="kpi-change neutral">98% of IG views from video</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Viral Potential</div>
+    <div class="kpi-value" style="font-size:22px;">925K</div>
+    <div class="kpi-change neutral">views on top YT video (28d)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">YT Growth</div>
+    <div class="kpi-value" style="font-size:22px;">+296%</div>
+    <div class="kpi-change neutral">subscriber growth this month</div>
+  </div>
+</div>
+
+<!-- Past Brand Collaborations -->
+<div class="section-title">Brand Collaboration Track Record</div>
+<div class="grid-2">
+  <div class="card">
+    <h3 style="display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f5a623;"></span>
+      Light My Bricks — Enterprise Light Kit (Feb 2026)
+    </h3>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Gifted product review • Multi-format campaign • 4 posts + Stories</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);">435K+</div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;">Total Views</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);">1,221</div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;">Total Likes</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);">74</div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;">Comments</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);">95.9%</div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;">Non-Follower Reach</div>
+      </div>
+    </div>
+    <div style="font-size:12px;margin-bottom:6px;">
+      <strong>Deliverables:</strong> Feature Reel, In-Depth Review Reel, Product Showcase Reel, Still Post, Multi-day Stories
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+      <a href="https://www.instagram.com/brickventuring/reel/DVBjNBCj96s/" target="_blank" style="font-size:11px;color:var(--teal);text-decoration:none;background:rgba(71,139,141,0.1);padding:3px 10px;border-radius:12px;">Feature &#8599;</a>
+      <a href="https://www.instagram.com/brickventuring/reel/DU8Srx2j3xf/" target="_blank" style="font-size:11px;color:var(--teal);text-decoration:none;background:rgba(71,139,141,0.1);padding:3px 10px;border-radius:12px;">Review &#8599;</a>
+      <a href="https://www.instagram.com/brickventuring/reel/DU5t6zoDCqF/" target="_blank" style="font-size:11px;color:var(--teal);text-decoration:none;background:rgba(71,139,141,0.1);padding:3px 10px;border-radius:12px;">Showcase &#8599;</a>
+      <a href="https://www.instagram.com/p/DUhGmK2DC0W/" target="_blank" style="font-size:11px;color:var(--teal);text-decoration:none;background:rgba(71,139,141,0.1);padding:3px 10px;border-radius:12px;">Still &#8599;</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#e63946;"></span>
+      Mattel Brick Shop — Hot Wheels Corvette (Nov 2025)
+    </h3>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">Paid partnership + gifted product • Multi-format campaign • 3 posts</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);">415</div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;">Total Likes</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);">46</div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;">Comments</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);">6</div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;">Reposts</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);">#ad</div>
+        <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;">Paid Partnership</div>
+      </div>
+    </div>
+    <div style="font-size:12px;margin-bottom:6px;">
+      <strong>Deliverables:</strong> Reveal/Review Reel, Feature Reel, Still Post
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+      <a href="https://www.instagram.com/brickventuring/reel/DQrxt3ikVhR/" target="_blank" style="font-size:11px;color:var(--teal);text-decoration:none;background:rgba(71,139,141,0.1);padding:3px 10px;border-radius:12px;">Reveal &#8599;</a>
+      <a href="https://www.instagram.com/brickventuring/reel/DQt5r-IkW5I/" target="_blank" style="font-size:11px;color:var(--teal);text-decoration:none;background:rgba(71,139,141,0.1);padding:3px 10px;border-radius:12px;">Feature &#8599;</a>
+      <a href="https://www.instagram.com/p/DQvWiSnDN2N/" target="_blank" style="font-size:11px;color:var(--teal);text-decoration:none;background:rgba(71,139,141,0.1);padding:3px 10px;border-radius:12px;">Still &#8599;</a>
+    </div>
+  </div>
+</div>
+
+<!-- Additional Collaborations -->
+<div class="card" style="margin-top:16px;margin-bottom:24px;">
+  <h3 style="display:flex;align-items:center;gap:8px;">
+    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--teal);"></span>
+    Lumibricks — Ongoing Partnership
+  </h3>
+  <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">Multiple video collaborations featuring Lumibricks lighting products</div>
+  <div style="font-size:13px;color:var(--text);line-height:1.6;">Long-term relationship with regular product features and reviews. Consistent content creation showcasing lighting kits across various LEGO sets and builds.</div>
+</div>
+
+<!-- Rate Card -->
+<div class="section-title">Partnership Packages</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;" id="rateCards">
+  <div class="card" style="border-color:var(--steel);position:relative;">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Starter</div>
+    <div style="font-size:28px;font-weight:800;color:var(--teal);margin-bottom:4px;">Single Post</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;">One dedicated post on a single platform</div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> 1 Reel OR 1 Still Post
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> Caption with brand mention
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> Hashtags & tags
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> Story share
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:8px 12px;background:rgba(71,139,141,0.1);border-radius:8px;text-align:center;">
+      <span style="font-size:11px;color:var(--text-dim);">Starting at</span>
+      <span style="font-size:18px;font-weight:700;color:var(--gold);margin-left:6px;">$150 - $300</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--gold);position:relative;">
+    <div style="position:absolute;top:-10px;right:16px;background:var(--gold);color:#0D0B61;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;text-transform:uppercase;">Most Popular</div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Campaign</div>
+    <div style="font-size:28px;font-weight:800;color:var(--gold);margin-bottom:4px;">Multi-Post</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;">Full product feature across formats</div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--gold);">&#10003;</span> 2-3 Reels (feature, review, reveal)
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--gold);">&#10003;</span> 1-2 Still/Carousel posts
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--gold);">&#10003;</span> Story series (build progress)
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--gold);">&#10003;</span> Cross-posted to TikTok
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--gold);">&#10003;</span> Content usage rights (30 days)
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:8px 12px;background:rgba(228,211,41,0.1);border-radius:8px;text-align:center;">
+      <span style="font-size:11px;color:var(--text-dim);">Starting at</span>
+      <span style="font-size:18px;font-weight:700;color:var(--gold);margin-left:6px;">$500 - $1,000</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--teal);position:relative;">
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;">Premium</div>
+    <div style="font-size:28px;font-weight:800;color:var(--teal);margin-bottom:4px;">Full Campaign</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.5;">Multi-platform integrated campaign</div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> Everything in Campaign, plus:
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> Dedicated YouTube video
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> All 4 platforms coverage
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> Performance report
+      </div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--teal);">&#10003;</span> Extended usage rights (90 days)
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:8px 12px;background:rgba(71,139,141,0.1);border-radius:8px;text-align:center;">
+      <span style="font-size:11px;color:var(--text-dim);">Starting at</span>
+      <span style="font-size:18px;font-weight:700;color:var(--gold);margin-left:6px;">$1,500 - $3,000</span>
+    </div>
+  </div>
+</div>
+
+<!-- Contact -->
+<div class="card" style="margin-bottom:24px;text-align:center;padding:28px;">
+  <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px;">Interested in working together?</div>
+  <div style="font-size:14px;color:var(--text-dim);margin-bottom:16px;">Reach out to discuss a custom partnership that fits your brand goals.</div>
+  <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+    <a href="https://www.instagram.com/brickventuring/" target="_blank" style="padding:10px 24px;background:var(--instagram);color:white;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">Instagram</a>
+    <a href="https://www.tiktok.com/@brickventuring" target="_blank" style="padding:10px 24px;background:var(--tiktok);color:#000;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">TikTok</a>
+    <a href="https://www.youtube.com/@brickventuring" target="_blank" style="padding:10px 24px;background:var(--youtube);color:white;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">YouTube</a>
+    <a href="https://www.facebook.com/brickventuring" target="_blank" style="padding:10px 24px;background:var(--facebook);color:white;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">Facebook</a>
+  </div>
+</div>
+</div><!-- end mediaKitTab -->
+
+<div class="footer">
+  Brickventuring Social Media Dashboard &middot; Updated monthly
+</div>
+
+<script>
+// ============================================================
+// DATA — Add new months here! Copy a block and update values.
+// ============================================================
+const monthlyData = [
+  {
+    month: "2026-03",
+    label: "March 2026",
+    isBaseline: true,
+    platforms: {
+      instagram: {
+        followers: 36900,
+        views: 0,
+        posts: { shortVideo: 0, longVideo: 0, image: 0, text: 0 },
+        engagement: { likes: 0, comments: 0, shares: 0, saves: 0 },
+        demographics: {
+          age: { "13-17": 5, "18-24": 25, "25-34": 38, "35-44": 20, "45-54": 8, "55+": 4 },
+          gender: { male: 50, female: 46, other: 4 },
+          topCountries: [
+            { country: "United States", pct: 43 },
+            { country: "United Kingdom", pct: 20 },
+            { country: "Canada", pct: 12 },
+            { country: "Australia", pct: 8 },
+            { country: "Germany", pct: 5 }
+          ]
+        },
+        topPosts: []
+      },
+      facebook: {
+        followers: 3287,
+        views: 0,
+        posts: { shortVideo: 0, longVideo: 0, image: 0, text: 0 },
+        engagement: { likes: 0, comments: 0, shares: 0, saves: 0 },
+        demographics: {
+          age: { "13-17": 2, "18-24": 13, "25-34": 30, "35-44": 31, "45-54": 16, "55+": 8 },
+          gender: { male: 56, female: 40, other: 4 },
+          topCountries: [
+            { country: "United States", pct: 50 },
+            { country: "United Kingdom", pct: 17 },
+            { country: "Canada", pct: 10 },
+            { country: "Philippines", pct: 6 },
+            { country: "India", pct: 4 }
+          ]
+        },
+        topPosts: []
+      },
+      tiktok: {
+        followers: 3835,
+        views: 0,
+        posts: { shortVideo: 0, longVideo: 0, image: 0, text: 0 },
+        engagement: { likes: 0, comments: 0, shares: 0, saves: 0 },
+        demographics: {
+          age: { "13-17": 0, "18-24": 37, "25-34": 33, "35-44": 19, "45-54": 8, "55+": 3 },
+          gender: { male: 79, female: 21, other: 0 },
+          topCountries: [
+            { country: "United States", pct: 28 },
+            { country: "United Kingdom", pct: 10 },
+            { country: "Canada", pct: 6 },
+            { country: "Mexico", pct: 3 },
+            { country: "Germany", pct: 3 }
+          ]
+        },
+        topPosts: []
+      },
+      youtube: {
+        followers: 1087,
+        views: 0,
+        posts: { shortVideo: 0, longVideo: 0, image: 0, text: 0 },
+        engagement: { likes: 0, comments: 0, shares: 0, saves: 0 },
+        demographics: {
+          age: { "13-17": 6, "18-24": 14, "25-34": 40, "35-44": 23, "45-54": 10, "55+": 7 },
+          gender: { male: 56, female: 43, other: 1 },
+          topCountries: [
+            { country: "United States", pct: 41 },
+            { country: "United Kingdom", pct: 8 },
+            { country: "India", pct: 8 },
+            { country: "Canada", pct: 5 },
+            { country: "Germany", pct: 4 }
+          ]
+        },
+        topPosts: []
+      }
+    }
+  },
+  {
+    month: "2026-04",
+    label: "April 2026",
+    platforms: {
+      instagram: {
+        followers: 36986,
+        views: 1653545,
+        posts: { shortVideo: 14, longVideo: 0, image: 2, text: 0 },
+        engagement: { likes: 38400, comments: 4800, shares: 2400, saves: 2409 },
+        demographics: {
+          age: { "13-17": 5, "18-24": 25, "25-34": 38, "35-44": 20, "45-54": 8, "55+": 4 },
+          gender: { male: 50, female: 46, other: 4 },
+          topCountries: [
+            { country: "United States", pct: 43 },
+            { country: "United Kingdom", pct: 20 },
+            { country: "Canada", pct: 12 },
+            { country: "Australia", pct: 8 },
+            { country: "Germany", pct: 5 }
+          ]
+        },
+        topPosts: [
+          { title: "Reel - Apr 29", type: "shortVideo", views: 496000, url: "https://www.instagram.com/brickventuring/reels/" },
+          { title: "Reel - Apr 24", type: "shortVideo", views: 251000, url: "https://www.instagram.com/brickventuring/reels/" },
+          { title: "Reel - May 2", type: "shortVideo", views: 11000, url: "https://www.instagram.com/brickventuring/reels/" },
+          { title: "Reel - May 3", type: "shortVideo", views: 5400, url: "https://www.instagram.com/brickventuring/reels/" },
+          { title: "Reel - Apr 30", type: "shortVideo", views: 5300, url: "https://www.instagram.com/brickventuring/reels/" }
+        ]
+      },
+      facebook: {
+        followers: 3320,
+        views: 16500,
+        posts: { shortVideo: 6, longVideo: 2, image: 8, text: 13 },
+        engagement: { likes: 1500, comments: 420, shares: 240, saves: 130 },
+        demographics: {
+          age: { "13-17": 2, "18-24": 13, "25-34": 30, "35-44": 31, "45-54": 16, "55+": 8 },
+          gender: { male: 56, female: 40, other: 4 },
+          topCountries: [
+            { country: "United States", pct: 50 },
+            { country: "United Kingdom", pct: 17 },
+            { country: "Canada", pct: 10 },
+            { country: "Philippines", pct: 6 },
+            { country: "India", pct: 4 }
+          ]
+        },
+        topPosts: [
+          { title: "Family LEGO build night recap", type: "image", views: 3600, url: "https://www.facebook.com/brickventuring" },
+          { title: "LEGO April Fools swap with wife", type: "shortVideo", views: 3100, url: "https://www.facebook.com/brickventuring" },
+          { title: "Best sets for Easter baskets", type: "text", views: 2400, url: "https://www.facebook.com/brickventuring" },
+          { title: "LEGO room tour - spring update", type: "longVideo", views: 2100, url: "https://www.facebook.com/brickventuring" },
+          { title: "Deal alert: 30% off at Target", type: "text", views: 1800, url: "https://www.facebook.com/brickventuring" }
+        ]
+      },
+      tiktok: {
+        followers: 3839,
+        views: 37700,
+        posts: { shortVideo: 3, longVideo: 0, image: 0, text: 0 },
+        engagement: { likes: 1100, comments: 15, shares: 53, saves: 0 },
+        demographics: {
+          age: { "13-17": 0, "18-24": 37, "25-34": 33, "35-44": 19, "45-54": 8, "55+": 3 },
+          gender: { male: 79, female: 21, other: 0 },
+          topCountries: [
+            { country: "United States", pct: 28 },
+            { country: "United Kingdom", pct: 10 },
+            { country: "Canada", pct: 6 },
+            { country: "Mexico", pct: 3 },
+            { country: "Germany", pct: 3 }
+          ]
+        },
+        topPosts: [
+          { title: "Now the real trick will be getting this into the set", type: "shortVideo", views: 86000, url: "https://www.tiktok.com/@brickventuring" },
+          { title: "happy mother's Day mom, I'm watching you", type: "shortVideo", views: 14000, url: "https://www.tiktok.com/@brickventuring" },
+          { title: "BEHOLD VENOMSAURUS", type: "shortVideo", views: 2700, url: "https://www.tiktok.com/@brickventuring" }
+        ]
+      },
+      youtube: {
+        followers: 4309,
+        views: 962900,
+        posts: { shortVideo: 3, longVideo: 7, image: 0, text: 0 },
+        engagement: { likes: 3200, comments: 720, shares: 280, saves: 620 },
+        demographics: {
+          age: { "13-17": 6, "18-24": 14, "25-34": 40, "35-44": 23, "45-54": 10, "55+": 7 },
+          gender: { male: 56, female: 43, other: 1 },
+          topCountries: [
+            { country: "United States", pct: 41 },
+            { country: "United Kingdom", pct: 8 },
+            { country: "India", pct: 8 },
+            { country: "Canada", pct: 5 },
+            { country: "Germany", pct: 4 }
+          ]
+        },
+        topPosts: [
+          { title: "The Smallest Package You'll Ever Get From LEGO", type: "longVideo", views: 925126, url: "https://www.youtube.com/@brickventuring/videos" },
+          { title: "LEGO Star Trek Rumors Have Me Worried", type: "longVideo", views: 5661, url: "https://www.youtube.com/@brickventuring/videos" },
+          { title: "LEGO Stickers are not the Problem, you are", type: "longVideo", views: 4106, url: "https://www.youtube.com/@brickventuring/videos" },
+          { title: "Whenever a LEGO package arrives", type: "shortVideo", views: 3231, url: "https://www.youtube.com/@brickventuring/shorts" },
+          { title: "Too Many LEGO Batmans?", type: "longVideo", views: 1984, url: "https://www.youtube.com/@brickventuring/videos" }
+        ]
+      }
+    }
+  }
+];
+
+// ============================================================
+// DASHBOARD ENGINE
+// ============================================================
+
+const PLATFORMS = [
+  { key: 'instagram', name: 'Instagram', color: '#E1306C' },
+  { key: 'facebook', name: 'Facebook', color: '#1877F2' },
+  { key: 'tiktok', name: 'TikTok', color: '#00f2ea' },
+  { key: 'youtube', name: 'YouTube', color: '#FF0000' }
+];
+
+const POST_TYPES = [
+  { key: 'shortVideo', label: 'Short Video', color: '#478B8D', tagClass: 'tag-short-video' },
+  { key: 'longVideo', label: 'Long Video', color: '#E4D329', tagClass: 'tag-long-video' },
+  { key: 'image', label: 'Image', color: '#E1306C', tagClass: 'tag-image' },
+  { key: 'text', label: 'Text', color: '#294669', tagClass: 'tag-text' }
+];
+
+let currentIndex = monthlyData.length - 1;
+let activeTopPostPlatform = 'all';
+let postTypeChart, viewsChart, followerTrendChart, viewsTrendChart, genderChart, demoPlatformChart;
+
+function fmt(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function pctChange(curr, prev) {
+  if (prev === null || prev === undefined) return { text: 'N/A', cls: 'neutral' };
+  if (prev === 0) return curr > 0 ? { text: 'New', cls: 'neutral' } : { text: '0%', cls: 'neutral' };
+  const pct = ((curr - prev) / prev * 100).toFixed(1);
+  if (pct > 0) return { text: `+${pct}%`, cls: 'up' };
+  if (pct < 0) return { text: `${pct}%`, cls: 'down' };
+  return { text: '0%', cls: 'neutral' };
+}
+
+function isPrevBaseline() {
+  return currentIndex > 0 && monthlyData[currentIndex - 1].isBaseline;
+}
+
+function getTotals(data) {
+  let followers = 0, views = 0, posts = 0, likes = 0, comments = 0, shares = 0, saves = 0;
+  PLATFORMS.forEach(p => {
+    const d = data.platforms[p.key];
+    followers += d.followers;
+    views += d.views;
+    posts += d.posts.shortVideo + d.posts.longVideo + d.posts.image + d.posts.text;
+    likes += d.engagement.likes;
+    comments += d.engagement.comments;
+    shares += d.engagement.shares;
+    saves += d.engagement.saves;
+  });
+  return { followers, views, posts, likes, comments, shares, saves };
+}
+
+function populateMonthSelect() {
+  const sel = document.getElementById('monthSelect');
+  sel.innerHTML = '';
+  monthlyData.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = m.label;
+    sel.appendChild(opt);
+  });
+  sel.value = currentIndex;
+}
+
+function updateNavButtons() {
+  document.getElementById('prevMonth').disabled = currentIndex === 0;
+  document.getElementById('nextMonth').disabled = currentIndex === monthlyData.length - 1;
+}
+
+function changeMonth(dir) {
+  currentIndex = Math.max(0, Math.min(monthlyData.length - 1, currentIndex + dir));
+  document.getElementById('monthSelect').value = currentIndex;
+  render();
+}
+
+function selectMonth(val) {
+  currentIndex = parseInt(val);
+  render();
+}
+
+function renderKPIs() {
+  const curr = monthlyData[currentIndex];
+  const prev = currentIndex > 0 ? monthlyData[currentIndex - 1] : null;
+  const currT = getTotals(curr);
+  const prevT = prev ? getTotals(prev) : null;
+  const engRate = currT.views > 0 ? ((currT.likes + currT.comments + currT.shares + currT.saves) / currT.views * 100).toFixed(1) : 0;
+  const prevEngRate = prevT && prevT.views > 0 ? ((prevT.likes + prevT.comments + prevT.shares + prevT.saves) / prevT.views * 100).toFixed(1) : null;
+
+  const baseline = isPrevBaseline();
+  const kpis = [
+    { label: 'Total Followers', value: currT.followers, prev: prevT?.followers, display: fmt(currT.followers) },
+    { label: 'Total Views', value: currT.views, prev: baseline ? null : prevT?.views, display: fmt(currT.views) },
+    { label: 'Total Posts', value: currT.posts, prev: baseline ? null : prevT?.posts, display: currT.posts.toString() },
+    { label: 'Engagement Rate', value: parseFloat(engRate), prev: baseline ? null : (prevEngRate ? parseFloat(prevEngRate) : null), display: engRate + '%' },
+    { label: 'Total Likes', value: currT.likes, prev: baseline ? null : prevT?.likes, display: fmt(currT.likes) },
+    { label: 'Total Comments', value: currT.comments, prev: baseline ? null : prevT?.comments, display: fmt(currT.comments) }
+  ];
+
+  const rollingAvg = getThreeMonthAvg();
+  const rollingAvgMap = rollingAvg ? {
+    'Total Followers': fmt(rollingAvg.followers),
+    'Total Views': fmt(rollingAvg.views),
+    'Total Posts': rollingAvg.posts.toString(),
+    'Engagement Rate': rollingAvg.engRate + '%',
+    'Total Likes': fmt(rollingAvg.likes),
+    'Total Comments': fmt(rollingAvg.comments)
+  } : null;
+
+  document.getElementById('kpiRow').innerHTML = kpis.map(k => {
+    const change = pctChange(k.value, k.prev);
+    const avgLine = rollingAvgMap ? `<div class="kpi-rolling-avg">3-mo avg: ${rollingAvgMap[k.label]}</div>` : '';
+    return `
+      <div class="kpi-card">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value">${k.display}</div>
+        <div class="kpi-change ${change.cls}">${change.text !== 'N/A' && change.text !== 'New' ? (change.cls === 'up' ? '&#9650; ' : change.cls === 'down' ? '&#9660; ' : '') + change.text + ' vs prev month' : (prev ? '' : 'First month')}</div>
+        ${avgLine}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderPlatformLists() {
+  const curr = monthlyData[currentIndex];
+  const prev = currentIndex > 0 ? monthlyData[currentIndex - 1] : null;
+  const baseline = isPrevBaseline();
+
+  document.getElementById('followersList').innerHTML = PLATFORMS.map(p => {
+    const val = curr.platforms[p.key].followers;
+    const prevVal = prev ? prev.platforms[p.key].followers : null;
+    const change = pctChange(val, prevVal);
+    return `
+      <div class="platform-row">
+        <div class="platform-info">
+          <div class="platform-dot" style="background:${p.color}"></div>
+          <span class="platform-name">${p.name}</span>
+        </div>
+        <div>
+          <span class="platform-value">${fmt(val)}</span>
+          ${prev ? `<span class="platform-change ${change.cls}">${change.text}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('viewsList').innerHTML = PLATFORMS.map(p => {
+    const val = curr.platforms[p.key].views;
+    const prevVal = (prev && !baseline) ? prev.platforms[p.key].views : null;
+    const change = pctChange(val, prevVal);
+    return `
+      <div class="platform-row">
+        <div class="platform-info">
+          <div class="platform-dot" style="background:${p.color}"></div>
+          <span class="platform-name">${p.name}</span>
+        </div>
+        <div>
+          <span class="platform-value">${fmt(val)}</span>
+          ${(prev && !baseline) ? `<span class="platform-change ${change.cls}">${change.text}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderEngagement() {
+  const curr = monthlyData[currentIndex];
+  const prev = currentIndex > 0 ? monthlyData[currentIndex - 1] : null;
+  const baseline = isPrevBaseline();
+  const metrics = ['likes', 'comments', 'shares', 'saves'];
+  const colors = ['#E4D329', '#478B8D', '#294669', '#0D0B61'];
+
+  document.getElementById('engagementCards').innerHTML = PLATFORMS.map((p, pi) => {
+    const d = curr.platforms[p.key].engagement;
+    const pd = (prev && !baseline) ? prev.platforms[p.key].engagement : null;
+    const total = d.likes + d.comments + d.shares + d.saves;
+    const engRate = curr.platforms[p.key].views > 0 ? (total / curr.platforms[p.key].views * 100).toFixed(1) : 0;
+
+    return `
+      <div class="card">
+        <h3><span class="platform-dot" style="background:${p.color};display:inline-block;margin-right:6px;vertical-align:middle"></span>${p.name} — ${engRate}% rate</h3>
+        ${metrics.map((m, mi) => {
+          const val = d[m];
+          const maxVal = Math.max(d.likes, d.comments, d.shares, d.saves);
+          const pct = maxVal > 0 ? (val / maxVal * 100) : 0;
+          const change = pd ? pctChange(val, pd[m]) : null;
+          return `
+            <div class="engagement-bar-wrap">
+              <div class="engagement-bar-label">
+                <span>${m.charAt(0).toUpperCase() + m.slice(1)}</span>
+                <span style="font-weight:600">${fmt(val)} ${change ? `<span class="${change.cls}" style="font-size:10px">${change.text}</span>` : ''}</span>
+              </div>
+              <div class="engagement-bar-track">
+                <div class="engagement-bar-fill" style="width:${pct}%;background:${colors[mi]}"></div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderPostTable() {
+  const curr = monthlyData[currentIndex];
+  document.getElementById('postTableBody').innerHTML = PLATFORMS.map(p => {
+    const d = curr.platforms[p.key];
+    const total = d.posts.shortVideo + d.posts.longVideo + d.posts.image + d.posts.text;
+    return `
+      <tr>
+        <td><span class="platform-dot" style="background:${p.color};display:inline-block;margin-right:8px;vertical-align:middle"></span>${p.name}</td>
+        <td>${d.posts.shortVideo}</td>
+        <td>${d.posts.longVideo}</td>
+        <td>${d.posts.image}</td>
+        <td>${d.posts.text}</td>
+        <td style="font-weight:700">${total}</td>
+        <td style="font-weight:700">${fmt(d.views)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderTopPosts() {
+  const curr = monthlyData[currentIndex];
+  const tabs = [{ key: 'all', name: 'All Platforms' }, ...PLATFORMS.map(p => ({ key: p.key, name: p.name }))];
+
+  document.getElementById('topPostsTabs').innerHTML = tabs.map(t =>
+    `<button class="tab-btn ${activeTopPostPlatform === t.key ? 'active' : ''}" onclick="setTopPostPlatform('${t.key}')">${t.name}</button>`
+  ).join('');
+
+  let posts = [];
+  const typeTagMap = { shortVideo: 'tag-short-video', longVideo: 'tag-long-video', image: 'tag-image', text: 'tag-text' };
+  const typeLabel = { shortVideo: 'Short Video', longVideo: 'Long Video', image: 'Image', text: 'Text' };
+
+  if (activeTopPostPlatform === 'all') {
+    PLATFORMS.forEach(p => {
+      curr.platforms[p.key].topPosts.forEach(post => {
+        posts.push({ ...post, platform: p.name, platformColor: p.color });
+      });
+    });
+    posts.sort((a, b) => b.views - a.views);
+    posts = posts.slice(0, 10);
+  } else {
+    const pData = curr.platforms[activeTopPostPlatform];
+    const pMeta = PLATFORMS.find(p => p.key === activeTopPostPlatform);
+    posts = pData.topPosts.map(post => ({ ...post, platform: pMeta.name, platformColor: pMeta.color }));
+  }
+
+  document.getElementById('topPostsContent').innerHTML = posts.length === 0
+    ? '<div style="color:var(--text-dim);padding:20px;text-align:center;">No post data available for this month.</div>'
+    : posts.map((post, i) => `
+    <div class="post-item">
+      <span class="post-rank">${i + 1}</span>
+      <span class="platform-dot" style="background:${post.platformColor};margin-right:8px;flex-shrink:0"></span>
+      ${post.url ? `<a href="${post.url}" target="_blank" class="post-title" style="color:var(--text);text-decoration:none;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text)'">${post.title} &#8599;</a>` : `<span class="post-title">${post.title}</span>`}
+      <span class="post-type-tag ${typeTagMap[post.type]}">${typeLabel[post.type]}</span>
+      <span class="post-views">${fmt(post.views)} views</span>
+    </div>
+  `).join('');
+}
+
+window.setTopPostPlatform = function(key) {
+  activeTopPostPlatform = key;
+  renderTopPosts();
+};
+
+function renderDemographics() {
+  const curr = monthlyData[currentIndex];
+
+  // Aggregate age across all platforms
+  const ageKeys = ["13-17", "18-24", "25-34", "35-44", "45-54", "55+"];
+  const ageAgg = {};
+  ageKeys.forEach(k => ageAgg[k] = 0);
+  PLATFORMS.forEach(p => {
+    ageKeys.forEach(k => {
+      ageAgg[k] += curr.platforms[p.key].demographics.age[k] || 0;
+    });
+  });
+  const ageTotal = Object.values(ageAgg).reduce((s, v) => s + v, 0);
+  const ageColors = ['#0D0B61', '#294669', '#478B8D', '#E4D329', '#5ee6a0', '#f87171'];
+
+  document.getElementById('ageDemo').innerHTML = ageKeys.map((k, i) => {
+    const pct = ageTotal > 0 ? (ageAgg[k] / ageTotal * 100).toFixed(0) : 0;
+    return `
+      <div class="demo-row">
+        <div class="demo-label">${k}</div>
+        <div class="demo-bar-track">
+          <div class="demo-bar-fill" style="width:${pct}%;background:${ageColors[i]}"></div>
+        </div>
+        <div class="demo-pct">${pct}%</div>
+      </div>
+    `;
+  }).join('');
+
+  // Gender donut
+  let genderAgg = { male: 0, female: 0, other: 0 };
+  PLATFORMS.forEach(p => {
+    genderAgg.male += curr.platforms[p.key].demographics.gender.male;
+    genderAgg.female += curr.platforms[p.key].demographics.gender.female;
+    genderAgg.other += curr.platforms[p.key].demographics.gender.other;
+  });
+  const genderTotal = genderAgg.male + genderAgg.female + genderAgg.other;
+
+  if (genderChart) genderChart.destroy();
+  genderChart = new Chart(document.getElementById('genderChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Male', 'Female', 'Other'],
+      datasets: [{
+        data: [genderAgg.male, genderAgg.female, genderAgg.other],
+        backgroundColor: ['#294669', '#478B8D', '#E4D329'],
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#9596b8', padding: 14, usePointStyle: true } },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const pct = genderTotal > 0 ? (ctx.raw / genderTotal * 100).toFixed(1) : 0;
+              return `${ctx.label}: ${pct}%`;
+            }
+          }
+        }
+      },
+      cutout: '60%'
+    }
+  });
+
+  // Top countries aggregated
+  const countryMap = {};
+  PLATFORMS.forEach(p => {
+    curr.platforms[p.key].demographics.topCountries.forEach(c => {
+      countryMap[c.country] = (countryMap[c.country] || 0) + c.pct;
+    });
+  });
+  const countries = Object.entries(countryMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const countryMax = countries.length > 0 ? countries[0][1] : 1;
+  const countryColors = ['#E4D329', '#478B8D', '#294669', '#0D0B61', '#5ee6a0'];
+
+  document.getElementById('countryDemo').innerHTML = countries.map((c, i) => `
+    <div class="demo-row">
+      <div class="demo-label" style="width:100px">${c[0]}</div>
+      <div class="demo-bar-track">
+        <div class="demo-bar-fill" style="width:${(c[1] / countryMax * 100).toFixed(0)}%;background:${countryColors[i]}"></div>
+      </div>
+      <div class="demo-pct">${(c[1] / PLATFORMS.length).toFixed(0)}%</div>
+    </div>
+  `).join('');
+
+  // Demographics by platform (stacked bar - age)
+  if (demoPlatformChart) demoPlatformChart.destroy();
+  demoPlatformChart = new Chart(document.getElementById('demoPlatformChart'), {
+    type: 'bar',
+    data: {
+      labels: PLATFORMS.map(p => p.name),
+      datasets: ageKeys.map((ak, i) => ({
+        label: ak,
+        data: PLATFORMS.map(p => curr.platforms[p.key].demographics.age[ak] || 0),
+        backgroundColor: ageColors[i],
+        borderRadius: i === ageKeys.length - 1 ? 4 : 0
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#9596b8', padding: 12, usePointStyle: true, font: { size: 10 } } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: '#9596b8' }, grid: { display: false } },
+        y: { stacked: true, ticks: { color: '#9596b8', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' }, max: 100 }
+      }
+    }
+  });
+}
+
+function renderCharts() {
+  const curr = monthlyData[currentIndex];
+
+  const postTypeTotals = POST_TYPES.map(pt =>
+    PLATFORMS.reduce((sum, p) => sum + curr.platforms[p.key].posts[pt.key], 0)
+  );
+
+  if (postTypeChart) postTypeChart.destroy();
+  postTypeChart = new Chart(document.getElementById('postTypeChart'), {
+    type: 'doughnut',
+    data: {
+      labels: POST_TYPES.map(pt => pt.label),
+      datasets: [{
+        data: postTypeTotals,
+        backgroundColor: POST_TYPES.map(pt => pt.color),
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#9596b8', padding: 14, usePointStyle: true } }
+      },
+      cutout: '60%'
+    }
+  });
+
+  if (viewsChart) viewsChart.destroy();
+  viewsChart = new Chart(document.getElementById('viewsChart'), {
+    type: 'bar',
+    data: {
+      labels: PLATFORMS.map(p => p.name),
+      datasets: [{
+        data: PLATFORMS.map(p => curr.platforms[p.key].views),
+        backgroundColor: PLATFORMS.map(p => p.color),
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#9596b8' }, grid: { display: false } },
+        y: { ticks: { color: '#9596b8', callback: v => fmt(v) }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+function renderTrendCharts() {
+  // Follower trend: show all months including baseline
+  const allLabels = monthlyData.map(m => m.label.replace(/\s*20\d{2}/, ''));
+
+  if (followerTrendChart) followerTrendChart.destroy();
+  followerTrendChart = new Chart(document.getElementById('followerTrendChart'), {
+    type: 'line',
+    data: {
+      labels: allLabels,
+      datasets: PLATFORMS.map(p => ({
+        label: p.name,
+        data: monthlyData.map(m => m.platforms[p.key].followers),
+        borderColor: p.color,
+        tension: 0.3,
+        fill: false,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: { legend: { position: 'bottom', labels: { color: '#9596b8', padding: 14, usePointStyle: true } } },
+      scales: {
+        x: { ticks: { color: '#9596b8' }, grid: { display: false } },
+        y: { ticks: { color: '#9596b8', callback: v => fmt(v) }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+
+  // Views trend: exclude baseline months (views=0 is not real data)
+  const nonBaselineData = monthlyData.filter(m => !m.isBaseline);
+  const viewLabels = nonBaselineData.map(m => m.label.replace(/\s*20\d{2}/, ''));
+
+  if (viewsTrendChart) viewsTrendChart.destroy();
+  viewsTrendChart = new Chart(document.getElementById('viewsTrendChart'), {
+    type: 'line',
+    data: {
+      labels: viewLabels,
+      datasets: PLATFORMS.map(p => ({
+        label: p.name,
+        data: nonBaselineData.map(m => m.platforms[p.key].views),
+        borderColor: p.color,
+        tension: 0.3,
+        fill: false,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: { legend: { position: 'bottom', labels: { color: '#9596b8', padding: 14, usePointStyle: true } } },
+      scales: {
+        x: { ticks: { color: '#9596b8' }, grid: { display: false } },
+        y: { ticks: { color: '#9596b8', callback: v => fmt(v) }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+function render() {
+  updateNavButtons();
+  renderKPIs();
+  renderPlatformLists();
+  renderEngagement();
+  renderPostTable();
+  renderCharts();
+  renderTrendCharts();
+  renderTopPosts();
+  renderDemographics();
+}
+
+// ============================================================
+// PAGE TAB SWITCHING
+// ============================================================
+window.switchPageTab = function(tab) {
+  const statsTab = document.getElementById('statsTab');
+  const mediaTab = document.getElementById('mediaKitTab');
+  const statsBtn = document.getElementById('pageTabStats');
+  const mediaBtn = document.getElementById('pageTabMedia');
+  const monthNav = document.querySelector('.month-nav');
+
+  if (tab === 'stats') {
+    statsTab.style.display = '';
+    mediaTab.style.display = 'none';
+    statsBtn.classList.add('active');
+    mediaBtn.classList.remove('active');
+    monthNav.style.display = 'flex';
+  } else {
+    statsTab.style.display = 'none';
+    mediaTab.style.display = '';
+    statsBtn.classList.remove('active');
+    mediaBtn.classList.add('active');
+    monthNav.style.display = 'none';
+  }
+};
+
+// ============================================================
+// 3-MONTH ROLLING AVERAGE
+// ============================================================
+function getThreeMonthAvg() {
+  const nonBaseline = monthlyData.filter(m => !m.isBaseline);
+  if (nonBaseline.length < 3) return null;
+
+  const last3 = nonBaseline.slice(-3);
+  const totals = last3.map(m => getTotals(m));
+
+  const avg = {
+    followers: Math.round(totals.reduce((s, t) => s + t.followers, 0) / 3),
+    views: Math.round(totals.reduce((s, t) => s + t.views, 0) / 3),
+    posts: Math.round(totals.reduce((s, t) => s + t.posts, 0) / 3),
+    likes: Math.round(totals.reduce((s, t) => s + t.likes, 0) / 3),
+    comments: Math.round(totals.reduce((s, t) => s + t.comments, 0) / 3),
+    shares: Math.round(totals.reduce((s, t) => s + t.shares, 0) / 3),
+    saves: Math.round(totals.reduce((s, t) => s + t.saves, 0) / 3)
+  };
+
+  avg.engRate = avg.views > 0
+    ? ((avg.likes + avg.comments + avg.shares + avg.saves) / avg.views * 100).toFixed(1)
+    : '0';
+
+  return avg;
+}
+
+populateMonthSelect();
+render();
+</script>
+</body>
+</html>
